@@ -16,7 +16,7 @@ This project uses GitHub Actions and Azure DevOps to build, push, and attest Doc
   - Outputs PR number and Docker image tag.
   - Purpose: Build and publish Docker images for ephemeral Review Apps triggered by PRs.
 
-- **Azure DevOps Build & Deploy Pipeline** (`.azuredevops/azure-pipelines.yml`):
+-- **Azure DevOps Build & Deploy Pipeline** (`.azuredevops/review-apps-build-deploy-pipeline.yml`):
   - Purpose: Build, push, deploy, and clean up ephemeral Review App environments for feature branches and PRs.
 
 - **Azure DevOps Trigger Pipeline** (`.azuredevops/review-apps-trigger-pipeline.yaml`):
