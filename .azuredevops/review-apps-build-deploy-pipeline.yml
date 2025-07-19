@@ -21,9 +21,6 @@ parameters:
   - name: SHA
     displayName: Commit SHA
     type: string
-  - name: DOCKER_TAG
-    displayName: DOCKER TAG
-    type: string
 
 pool:
   vmImage: 'ubuntu-latest'
