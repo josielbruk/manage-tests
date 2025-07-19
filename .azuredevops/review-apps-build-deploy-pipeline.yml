@@ -1,22 +1,19 @@
 name: 'Review App Build & Deploy Pipeline'
-#
-# This Azure DevOps pipeline builds, pushes, deploys, and cleans up ephemeral Review App environments
-# for feature branches and pull requests. Images are tagged per PR and used for temporary
-# environments for feature review and testing.
+
 trigger: none
 pr: none
 
 variables:
-  DOCKER_REGISTRY: 'ghcr.io/${{ variables['Build.Repository.Name'] }}'
-  PR_NUMBER: $[variables['System.PullRequest.PullRequestId']]
-  SHA: $[variables['Build.SourceVersion']]
-  DB_IMAGE: 'ghcr.io/${{ variables['Build.Repository.Name'] }}/pr-${{ variables['PR_NUMBER'] }}-db:${{ variables['SHA'] }}'
-  FRONTEND_IMAGE: 'ghcr.io/${{ variables['Build.Repository.Name'] }}/pr-${{ variables['PR_NUMBER'] }}-app:${{ variables['SHA'] }}'
+  DOCKER_REGISTRY: 'ghcr.io/$(Build.Repository.Name)'
+  PR_NUMBER: $(System.PullRequest.PullRequestId)
+  SHA: $(Build.SourceVersion)
+  DB_IMAGE: 'ghcr.io/$(Build.Repository.Name)/pr-$(System.PullRequest.PullRequestId)-db:$(Build.SourceVersion)'
+  FRONTEND_IMAGE: 'ghcr.io/$(Build.Repository.Name)/pr-$(System.PullRequest.PullRequestId)-app:$(Build.SourceVersion)'
   AZURE_CONTAINERAPPS_ENV: 'cae-review-apps-env'
   AZURE_RESOURCE_GROUP: 'rg-cae-review-apps'
   DB_NAME: 'reviewapp'
   DB_USER: 'reviewuser'
-  DB_PASSWORD: '$(DB_PASSWORD)'
+  DB_PASSWORD: $(DB_PASSWORD)
 
 pool:
   vmImage: 'ubuntu-latest'
@@ -27,24 +24,29 @@ stages:
   - job: BuildImages
     steps:
     - checkout: self
+
     - task: DockerInstaller@0
       inputs:
         dockerVersion: 'latest'
+
     - script: |
-        docker build -t $DB_IMAGE apps/database
-        docker build -t $FRONTEND_IMAGE apps/frontend
+        docker build -t $(DB_IMAGE) apps/database
+        docker build -t $(FRONTEND_IMAGE) apps/frontend
+
     - script: |
-        echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-        docker push $DB_IMAGE
-        docker push $FRONTEND_IMAGE
+        echo $(GITHUB_TOKEN) | docker login ghcr.io -u $(GITHUB_USER) --password-stdin
+        docker push $(DB_IMAGE)
+        docker push $(FRONTEND_IMAGE)
       env:
         GITHUB_TOKEN: $(GITHUB_TOKEN)
+        GITHUB_USER: $(GITHUB_USER)
 
 - stage: Deploy
   jobs:
   - job: DeployReviewApp
     steps:
     - checkout: self
+
     - task: AzureCLI@2
       inputs:
         azureSubscription: 'az-ado-sc'
@@ -52,30 +54,31 @@ stages:
         scriptLocation: 'inlineScript'
         inlineScript: |
           az containerapp create \
-            --name frontend-pr-${{ variables['PR_NUMBER'] }} \
-            --resource-group $AZURE_RESOURCE_GROUP \
-            --environment $AZURE_CONTAINERAPPS_ENV \
-            --image $FRONTEND_IMAGE \
-            --env-vars DB_HOST=db-pr-${{ variables['PR_NUMBER'] }} DB_PORT=5432 DB_NAME=$DB_NAME DB_USER=$DB_USER DB_PASSWORD=$DB_PASSWORD
+            --name frontend-pr-$(PR_NUMBER) \
+            --resource-group $(AZURE_RESOURCE_GROUP) \
+            --environment $(AZURE_CONTAINERAPPS_ENV) \
+            --image $(FRONTEND_IMAGE) \
+            --env-vars DB_HOST=db-pr-$(PR_NUMBER) DB_PORT=5432 DB_NAME=$(DB_NAME) DB_USER=$(DB_USER) DB_PASSWORD=$(DB_PASSWORD)
 
           az containerapp create \
-            --name db-pr-${{ variables['PR_NUMBER'] }} \
-            --resource-group $AZURE_RESOURCE_GROUP \
-            --environment $AZURE_CONTAINERAPPS_ENV \
-            --image $DB_IMAGE \
-            --env-vars POSTGRES_DB=$DB_NAME POSTGRES_USER=$DB_USER POSTGRES_PASSWORD=$DB_PASSWORD
+            --name db-pr-$(PR_NUMBER) \
+            --resource-group $(AZURE_RESOURCE_GROUP) \
+            --environment $(AZURE_CONTAINERAPPS_ENV) \
+            --image $(DB_IMAGE) \
+            --env-vars POSTGRES_DB=$(DB_NAME) POSTGRES_USER=$(DB_USER) POSTGRES_PASSWORD=$(DB_PASSWORD)
 
 - stage: Cleanup
-  condition: or(eq(variables['Build.Reason'], 'PullRequestClosed'), eq(variables['Build.Reason'], 'Merged'))
+  condition: or(eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.Reason'], 'PullRequestMerged'))
   jobs:
   - job: CleanupReviewApp
     steps:
     - checkout: self
+
     - task: AzureCLI@2
       inputs:
         azureSubscription: 'az-ado-sc'
         scriptType: 'bash'
         scriptLocation: 'inlineScript'
         inlineScript: |
-          az containerapp delete --name frontend-pr-${{ variables['PR_NUMBER'] }} --resource-group $AZURE_RESOURCE_GROUP --yes
-          az containerapp delete --name db-pr-${{ variables['PR_NUMBER'] }} --resource-group $AZURE_RESOURCE_GROUP --yes
+          az containerapp delete --name frontend-pr-$(PR_NUMBER) --resource-group $(AZURE_RESOURCE_GROUP) --yes
+          az containerapp delete --name db-pr-$(PR_NUMBER) --resource-group $(AZURE_RESOURCE_GROUP) --yes
