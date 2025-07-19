@@ -2,7 +2,7 @@
 name: 'Review App Build & Publish'
 on:
   pull_request:
-    types: [opened, synchronize]
+    types: [opened, synchronize, closed, reopened]
 
 permissions:
   id-token: write
