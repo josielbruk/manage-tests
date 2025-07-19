@@ -13,9 +13,9 @@ parameters:
     type: string
 
 variables:
-  DOCKER_REGISTRY: 'ghcr.io/$(Build.Repository.Name)'
-  DB_IMAGE: 'ghcr.io/$(Build.Repository.Name)/pr-${{ parameters.PR_NUMBER }}-db:${{ parameters.SHA }}'
-  FRONTEND_IMAGE: 'ghcr.io/$(Build.Repository.Name)/pr-${{ parameters.PR_NUMBER }}-app:${{ parameters.SHA }}'
+  DOCKER_REGISTRY: 'ghcr.io/josielbruk'
+  DB_IMAGE: '$(DOCKER_REGISTRY)/pr-${{ parameters.PR_NUMBER }}-db:${{ parameters.SHA }}'
+  FRONTEND_IMAGE: '$(DOCKER_REGISTRY)/pr-${{ parameters.PR_NUMBER }}-app:${{ parameters.SHA }}'
   AZURE_CONTAINERAPPS_ENV: 'cae-review-apps-env'
   AZURE_RESOURCE_GROUP: 'rg-cae-review-apps'
   DB_NAME: 'reviewapp'
