@@ -1,3 +1,8 @@
+name: 'Review App Build & Deploy Pipeline'
+#
+# This Azure DevOps pipeline builds, pushes, deploys, and cleans up ephemeral Review App environments
+# for feature branches and pull requests. Images are tagged per PR and used for temporary
+# environments for feature review and testing.
 trigger:
   branches:
     include:

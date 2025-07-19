@@ -6,17 +6,21 @@ This project uses GitHub Actions and Azure DevOps to build, push, and attest Doc
 
 ### How It Works
 
-- **GitHub Actions Workflow** (`.github/workflows/review-apps-build.yaml`):
+### Pipeline Files
+
+- **GitHub Actions Workflow** (`.github/workflows/review-apps-publish.yaml`):
   - Runs on PR open and updates.
   - Builds Docker images named and tagged as `pr-<number>-app:<sha>` for the frontend and `pr-<number>-db:<sha>` for the database.
   - Pushes images to GitHub Container Registry (`ghcr.io`).
   - Generates artifact attestation for provenance.
   - Outputs PR number and Docker image tag.
-- **Azure DevOps Pipeline** (see `.azuredevops/pr-trigger-pipeline.yml`):
-  - Can be triggered from GitHub Actions.
-  - Receives PR number, SHA, and Docker tag as parameters.
-  - Deploys containers to Azure Container Apps for the PR environment.
-  - Cleans up environments when PR is closed/merged.
+  - Purpose: Build and publish Docker images for ephemeral Review Apps triggered by PRs.
+
+- **Azure DevOps Build & Deploy Pipeline** (`.azuredevops/azure-pipelines.yml`):
+  - Purpose: Build, push, deploy, and clean up ephemeral Review App environments for feature branches and PRs.
+
+- **Azure DevOps Trigger Pipeline** (`.azuredevops/review-apps-trigger-pipeline.yaml`):
+  - Purpose: Triggered by GitHub PR events, receives PR number, SHA, and Docker tag to deploy and manage ephemeral environments for feature review and testing.
 
 ### Usage
 
@@ -25,9 +29,9 @@ This project uses GitHub Actions and Azure DevOps to build, push, and attest Doc
    - `GITHUB_TOKEN`: (default, provided by GitHub Actions)
    - `AZURE_DEVOPS_PROJECT_URL`: URL to your Azure DevOps project.
    - `AZURE_DEVOPS_TOKEN`: Personal Access Token for Azure DevOps.
-3. **Configure Azure DevOps Pipeline:**
-   - Import `.azuredevops/pr-trigger-pipeline.yml` into your Azure DevOps project.
-   - Ensure the pipeline is named `pr-trigger-pipeline` (or update the workflow to match).
+3. **Configure Azure DevOps Pipelines:**
+   - Import `.azuredevops/azure-pipelines.yml` and `.azuredevops/review-apps-trigger-pipeline.yaml` into your Azure DevOps project.
+   - Ensure the pipelines are named clearly for review app usage.
    - Set up a service connection for Azure CLI tasks.
 4. **Set Required Environment Variables:**
    - In Azure DevOps or GitHub Actions, set:

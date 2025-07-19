@@ -3,6 +3,10 @@ name: 'Review App Trigger Pipeline'
 # This Azure DevOps pipeline is for Review Apps only.
 # It is triggered by GitHub PR events and receives PR number, SHA, and Docker tag
 # to deploy and manage ephemeral environments for feature review and testing.
+#
+# This Azure DevOps pipeline is for Review Apps only.
+# It is triggered by GitHub PR events and receives PR number, SHA, and Docker tag
+# to deploy and manage ephemeral environments for feature review and testing.
 trigger: none
 pr: none
 
