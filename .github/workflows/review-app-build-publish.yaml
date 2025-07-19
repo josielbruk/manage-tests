@@ -1,7 +1,14 @@
+
 name: 'Review App Build & Publish'
 on:
   pull_request:
     types: [opened, synchronize]
+
+permissions:
+  id-token: write
+  contents: read
+  packages: write
+  attestations: write
 
 jobs:
 
