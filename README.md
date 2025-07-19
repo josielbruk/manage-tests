@@ -102,4 +102,4 @@ This project uses GitHub Actions and Azure DevOps to build, push, and attest Doc
 
 ---
 
-For further customization, or troubleshooting, see the comments in workflow and pipeline YAML files.
+For further customization or troubleshooting, see the comments in workflow and pipeline YAML files.
