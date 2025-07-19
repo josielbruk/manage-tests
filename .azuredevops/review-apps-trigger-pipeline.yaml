@@ -17,9 +17,6 @@ parameters:
   - name: SHA
     displayName: Commit SHA
     type: string
-  - name: DOCKER_TAG
-    displayName: DOCKER TAG
-    type: string
 
 pool:
   vmImage: 'ubuntu-latest'
@@ -28,5 +25,5 @@ steps:
 - script: |
     echo "PR Number: ${{ parameters.PR_NUMBER }}"
     echo "SHA: ${{ parameters.SHA }}"
-    echo "Docker Image Tag: ${{ parameters.DOCKER_TAG }}"
+    echo "Docker Image Tag: "PR-${{ parameters.PR_NUMBER }}-${{ parameters.SHA }}"
   displayName: 'Print PR info and Docker tag'
