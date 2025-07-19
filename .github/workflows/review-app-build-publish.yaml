@@ -11,66 +11,57 @@ permissions:
   attestations: write
 
 env:
-  ORG_NAME: 'josielbruk'  # 🔁 Replace this with your actual GitHub org name
+  ORG_NAME: ${{ github.repository_owner }}
 
 jobs:
   build:
-    name: 'Build'
+    name: 'Build & Push Container Images'
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 5
 
     env:
       REGISTRY: ghcr.io/${{ github.repository_owner }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
       APP_IMAGE_NAME: pr-${{ github.event.pull_request.number }}-app
       DB_IMAGE_NAME: pr-${{ github.event.pull_request.number }}-db
 
     steps:
-      - name: 'Checkout code'
+      - name: 'Checkout repository'
         uses: actions/checkout@v4
 
-      - name: Log in to the Container registry
+      - name: 'Log in to GitHub Container Registry (GHCR)'
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push frontend image
-        id: push_app
+      - name: 'Build and push frontend image'
         uses: docker/build-push-action@v5
         with:
           context: apps/frontend
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.APP_IMAGE_NAME }}:${{ github.sha }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.APP_IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.APP_IMAGE_NAME }}:pr-${{ env.PR_NUMBER }}
 
-      - name: Make frontend image public
-        run: |
-          curl -L -X PATCH \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${{ secrets.GHCR_PAT }}" \
-            https://api.github.com/orgs/${{ env.ORG_NAME }}/packages/container/${{ env.APP_IMAGE_NAME }}/visibility \
-            -d '{"visibility":"public"}'
-
-      - name: Build and push database image
-        id: push_db
+      - name: 'Build and push database image'
         uses: docker/build-push-action@v5
         with:
           context: apps/database
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.DB_IMAGE_NAME }}:${{ github.sha }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.DB_IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.DB_IMAGE_NAME }}:pr-${{ env.PR_NUMBER }}
 
-      - name: Make database image public
+      - name: 'Output image tags'
         run: |
-          curl -L -X PATCH \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${{ secrets.GHCR_PAT }}" \
-            https://api.github.com/orgs/${{ env.ORG_NAME }}/packages/container/${{ env.DB_IMAGE_NAME }}/visibility \
-            -d '{"visibility":"public"}'
-
-      - name: Output image tags
-        run: |
-          echo "Frontend image: ${{ env.REGISTRY }}/${{ env.APP_IMAGE_NAME }}:${{ github.sha }}"
-          echo "Database image: ${{ env.REGISTRY }}/${{ env.DB_IMAGE_NAME }}:${{ github.sha }}"
+          echo "Frontend image:"
+          echo "  ${{ env.REGISTRY }}/${{ env.APP_IMAGE_NAME }}:${{ github.sha }}"
+          echo "  ${{ env.REGISTRY }}/${{ env.APP_IMAGE_NAME }}:pr-${{ env.PR_NUMBER }}"
+          echo "Database image:"
+          echo "  ${{ env.REGISTRY }}/${{ env.DB_IMAGE_NAME }}:${{ github.sha }}"
+          echo "  ${{ env.REGISTRY }}/${{ env.DB_IMAGE_NAME }}:pr-${{ env.PR_NUMBER }}"
 
   trigger-azure-pipeline:
     name: 'Trigger Azure Pipeline for PR'
