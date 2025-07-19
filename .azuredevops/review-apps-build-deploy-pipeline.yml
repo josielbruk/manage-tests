@@ -3,16 +3,6 @@ name: 'Review App Build & Deploy Pipeline'
 trigger: none
 pr: none
 
-variables:
-  DOCKER_REGISTRY: 'ghcr.io/$(Build.Repository.Name)'
-  DB_IMAGE: 'ghcr.io/$(Build.Repository.Name)/pr-$(PR_NUMBER)-db:$(SHA)'
-  FRONTEND_IMAGE: 'ghcr.io/$(Build.Repository.Name)/pr-$(PR_NUMBER)-app:$(SHA)'
-  AZURE_CONTAINERAPPS_ENV: 'cae-review-apps-env'
-  AZURE_RESOURCE_GROUP: 'rg-cae-review-apps'
-  DB_NAME: 'reviewapp'
-  DB_USER: 'reviewuser'
-  DB_PASSWORD: 'reviewpassword'
-
 
 parameters:
   - name: PR_NUMBER
@@ -21,6 +11,19 @@ parameters:
   - name: SHA
     displayName: Commit SHA
     type: string
+
+variables:
+  DOCKER_REGISTRY: 'ghcr.io/$(Build.Repository.Name)'
+  DB_IMAGE: 'ghcr.io/$(Build.Repository.Name)/pr-${{ parameters.PR_NUMBER }}-db:${{ parameters.SHA }}'
+  FRONTEND_IMAGE: 'ghcr.io/$(Build.Repository.Name)/pr-${{ parameters.PR_NUMBER }}-app:${{ parameters.SHA }}'
+  AZURE_CONTAINERAPPS_ENV: 'cae-review-apps-env'
+  AZURE_RESOURCE_GROUP: 'rg-cae-review-apps'
+  DB_NAME: 'reviewapp'
+  DB_USER: 'reviewuser'
+  DB_PASSWORD: 'reviewpassword'
+
+
+
 
 pool:
   vmImage: 'ubuntu-latest'
@@ -66,5 +69,5 @@ stages:
         scriptType: 'bash'
         scriptLocation: 'inlineScript'
         inlineScript: |
-          az containerapp delete --name frontend-pr-$(PR_NUMBER) --resource-group $(AZURE_RESOURCE_GROUP) --yes
-          az containerapp delete --name db-pr-$(PR_NUMBER) --resource-group $(AZURE_RESOURCE_GROUP) --yes
+          az containerapp delete --name frontend-pr-${{parameters.PR_NUMBER }} --resource-group $(AZURE_RESOURCE_GROUP) --yes
+          az containerapp delete --name db-pr-${{parameters.PR_NUMBER }} --resource-group $(AZURE_RESOURCE_GROUP) --yes
