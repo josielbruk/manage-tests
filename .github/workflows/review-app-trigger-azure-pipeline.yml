@@ -36,4 +36,4 @@ jobs:
           az pipelines run --organization ${{ vars.AZURE_DEVOPS_PROJECT_URL }} \
             --project manage-test \
             --name 'Review apps trigger' \
-            --variables PR_NUMBER=${{ env.PR_NUMBER }} SHA=${{ env.SHA }} DOCKER_TAG=${{ env.DOCKER_TAG }}
+            --parameters PR_NUMBER=${{ env.PR_NUMBER }} SHA=${{ env.SHA }} DOCKER_TAG=${{ env.DOCKER_TAG }}
