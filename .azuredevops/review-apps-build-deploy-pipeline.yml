@@ -15,6 +15,18 @@ variables:
   DB_USER: 'reviewuser'
   DB_PASSWORD: 'reviewpassword'
 
+
+parameters:
+  - name: PR_NUMBER
+    displayName: PR Number
+    type: string
+  - name: SHA
+    displayName: Commit SHA
+    type: string
+  - name: DOCKER_TAG
+    displayName: DOCKER TAG
+    type: string
+
 pool:
   vmImage: 'ubuntu-latest'
 
