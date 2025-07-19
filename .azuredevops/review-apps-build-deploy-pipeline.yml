@@ -13,7 +13,7 @@ variables:
   AZURE_RESOURCE_GROUP: 'rg-cae-review-apps'
   DB_NAME: 'reviewapp'
   DB_USER: 'reviewuser'
-  DB_PASSWORD: $(DB_PASSWORD)
+  DB_PASSWORD: 'reviewpassword'
 
 pool:
   vmImage: 'ubuntu-latest'
