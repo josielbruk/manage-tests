@@ -1,0 +1,25 @@
+name: 'PR Trigger Pipeline'
+#
+# This Azure DevOps pipeline is for Review Apps only.
+# It is triggered by GitHub PR events and receives PR number, SHA, and Docker tag
+# to deploy and manage ephemeral environments for feature review and testing.
+trigger: none
+pr: none
+
+parameters:
+  - name: PR_NUMBER
+    type: string
+  - name: SHA
+    type: string
+  - name: DOCKER_TAG
+    type: string
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- script: |
+    echo "PR Number: ${{ parameters.PR_NUMBER }}"
+    echo "SHA: ${{ parameters.SHA }}"
+    echo "Docker Image Tag: ${{ parameters.DOCKER_TAG }}"
+  displayName: 'Print PR info and Docker tag'

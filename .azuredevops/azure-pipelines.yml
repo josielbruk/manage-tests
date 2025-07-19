@@ -24,6 +24,7 @@ pool:
   vmImage: 'ubuntu-latest'
 
 stages:
+- stage: Build
   jobs:
   - job: BuildImages
     steps:
@@ -41,6 +42,7 @@ stages:
       env:
         GITHUB_TOKEN: $(GITHUB_TOKEN)
 
+- stage: Deploy
   jobs:
   - job: DeployReviewApp
     steps:
@@ -65,6 +67,7 @@ stages:
             --image $DB_IMAGE \
             --env-vars POSTGRES_DB=$DB_NAME POSTGRES_USER=$DB_USER POSTGRES_PASSWORD=$DB_PASSWORD
 
+- stage: Cleanup
   condition: or(eq(variables['Build.Reason'], 'PullRequestClosed'), eq(variables['Build.Reason'], 'Merged'))
   jobs:
   - job: CleanupReviewApp
@@ -78,4 +81,3 @@ stages:
         inlineScript: |
           az containerapp delete --name frontend-pr-${{ variables['PR_NUMBER'] }} --resource-group $AZURE_RESOURCE_GROUP --yes
           az containerapp delete --name db-pr-${{ variables['PR_NUMBER'] }} --resource-group $AZURE_RESOURCE_GROUP --yes
-          az containerapp delete --name frontend-pr-${{ variables['PR_NUMBER'] }} --resource-group $AZURE_RESOURCE_GROUP --yes
