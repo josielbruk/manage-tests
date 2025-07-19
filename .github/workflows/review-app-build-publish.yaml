@@ -4,6 +4,7 @@ on:
     types: [opened, synchronize]
 
 jobs:
+
   build:
     name: 'Build'
     runs-on: ubuntu-latest
@@ -50,29 +51,22 @@ jobs:
           echo "Frontend image: ${{ env.REGISTRY }}/${{ env.APP_IMAGE_NAME }}:${{ github.sha }}"
           echo "Database image: ${{ env.REGISTRY }}/${{ env.DB_IMAGE_NAME }}:${{ github.sha }}"
 
-      - name: Generate artifact attestation for frontend
+      # - name: Generate artifact attestation for frontend
         # uses: actions/attest-build-provenance@v2
         # with:
         #   subject-name: ${{ env.REGISTRY }}/${{ env.APP_IMAGE_NAME }}
         #   subject-digest: ${{ steps.push_app.outputs.digest }}
         #   push-to-registry: true
 
-      - name: Generate artifact attestation for database
+      # - name: Generate artifact attestation for database
         # uses: actions/attest-build-provenance@v2
         # with:
         #   subject-name: ${{ env.REGISTRY }}/${{ env.DB_IMAGE_NAME }}
         #   subject-digest: ${{ steps.push_db.outputs.digest }}
         #   push-to-registry: true
 
-      - name: Trigger Azure Pipeline for PR
-        uses: actions/github-script@v7
-        with:
-          script: |
-            github.rest.actions.createWorkflowDispatch({
-              owner: '${{ github.repository_owner }}',
-              repo: '${{ github.repository }}',
-              workflow_id: 'review-app-trigger-azure-pipeline.yml',
-              ref: '${{ github.ref }}',
-              inputs: {}
-            })
+  trigger-azure-pipeline:
+    name: 'Trigger Azure Pipeline for PR'
+    needs: build
+    uses: ./.github/workflows/review-app-trigger-azure-pipeline.yml
 
