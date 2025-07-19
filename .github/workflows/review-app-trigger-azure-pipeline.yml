@@ -36,4 +36,5 @@ jobs:
           az pipelines run --organization ${{ vars.AZURE_DEVOPS_PROJECT_URL }} \
             --project manage-test \
             --name 'Review apps trigger' \
+            --branch test001
             --parameters PR_NUMBER=${{ env.PR_NUMBER }} SHA=${{ env.SHA }}
