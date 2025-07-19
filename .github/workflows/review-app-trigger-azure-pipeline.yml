@@ -5,6 +5,7 @@ on:
 
 jobs:
   trigger-azure-pipeline:
+    name: Deploy Review App
     runs-on: ubuntu-latest
     environment: azure
     steps:
