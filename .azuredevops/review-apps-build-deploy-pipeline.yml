@@ -19,8 +19,8 @@ variables:
   SHA: $[variables['Build.SourceVersion']]
   DB_IMAGE: 'ghcr.io/${{ variables['Build.Repository.Name'] }}/pr-${{ variables['PR_NUMBER'] }}-db:${{ variables['SHA'] }}'
   FRONTEND_IMAGE: 'ghcr.io/${{ variables['Build.Repository.Name'] }}/pr-${{ variables['PR_NUMBER'] }}-app:${{ variables['SHA'] }}'
-  AZURE_CONTAINERAPPS_ENV: 'your-aca-env-name'
-  AZURE_RESOURCE_GROUP: 'your-resource-group'
+  AZURE_CONTAINERAPPS_ENV: 'cae-review-apps-env'
+  AZURE_RESOURCE_GROUP: 'rg-cae-review-apps'
   DB_NAME: 'reviewapp'
   DB_USER: 'reviewuser'
   DB_PASSWORD: '$(DB_PASSWORD)'

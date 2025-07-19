@@ -6,21 +6,41 @@ This project uses GitHub Actions and Azure DevOps to build, push, and attest Doc
 
 ### How It Works
 
-### Pipeline Files
+### CI/CD Workflow & Pipeline Files
 
-- **GitHub Actions Workflow** (`.github/workflows/review-apps-publish.yaml`):
-  - Runs on PR open and updates.
-  - Builds Docker images named and tagged as `pr-<number>-app:<sha>` for the frontend and `pr-<number>-db:<sha>` for the database.
+#### GitHub Actions Workflows (`.github/workflows/`)
+
+- **review-apps-build.yaml**
+  - Builds Docker images for frontend and database on PR open/update.
+  - Tags images as `pr-<number>-app:<sha>` and `pr-<number>-db:<sha>`.
   - Pushes images to GitHub Container Registry (`ghcr.io`).
-  - Generates artifact attestation for provenance.
+  - Attests provenance for supply chain security.
+  - Purpose: Build and publish Docker images for ephemeral Review Apps.
+
+- **review-apps-publish.yaml**
+  - Similar to `review-apps-build.yaml`, used for building and publishing images for PR environments.
+  - Purpose: Build and publish Docker images for review apps (legacy/alternate workflow).
+
+- **review-app-build-publish.yaml**
+  - Combined build and publish workflow for review app images.
+  - Purpose: Build and publish Docker images for PR environments (alternate workflow).
+
+- **azure-pipeline-pr.yml**
+  - Triggers Azure DevOps pipeline on PR open/update.
   - Outputs PR number and Docker image tag.
-  - Purpose: Build and publish Docker images for ephemeral Review Apps triggered by PRs.
+  - Purpose: Integrates GitHub PR events with Azure DevOps for review app deployment.
 
--- **Azure DevOps Build & Deploy Pipeline** (`.azuredevops/review-apps-build-deploy-pipeline.yml`):
-  - Purpose: Build, push, deploy, and clean up ephemeral Review App environments for feature branches and PRs.
+#### Azure DevOps Pipelines (`.azuredevops/`)
 
-- **Azure DevOps Trigger Pipeline** (`.azuredevops/review-apps-trigger-pipeline.yaml`):
-  - Purpose: Triggered by GitHub PR events, receives PR number, SHA, and Docker tag to deploy and manage ephemeral environments for feature review and testing.
+- **review-apps-build-deploy-pipeline.yml**
+  - Builds, pushes, deploys, and cleans up ephemeral Review App environments for feature branches and PRs.
+  - Uses PR number and SHA for image tagging and environment management.
+  - Purpose: Full build/deploy/cleanup pipeline for review apps.
+
+- **review-apps-trigger-pipeline.yaml**
+  - Triggered by GitHub PR events (via workflow).
+  - Receives PR number, SHA, and Docker tag to deploy/manage ephemeral environments for feature review/testing.
+  - Purpose: PR event-driven deployment pipeline for review apps.
 
 ### Usage
 
@@ -30,7 +50,7 @@ This project uses GitHub Actions and Azure DevOps to build, push, and attest Doc
    - `AZURE_DEVOPS_PROJECT_URL`: URL to your Azure DevOps project.
    - `AZURE_DEVOPS_TOKEN`: Personal Access Token for Azure DevOps.
 3. **Configure Azure DevOps Pipelines:**
-   - Import `.azuredevops/azure-pipelines.yml` and `.azuredevops/review-apps-trigger-pipeline.yaml` into your Azure DevOps project.
+   - Import `.azuredevops/review-apps-build-deploy-pipeline.yml` and `.azuredevops/review-apps-trigger-pipeline.yaml` into your Azure DevOps project.
    - Ensure the pipelines are named clearly for review app usage.
    - Set up a service connection for Azure CLI tasks.
 4. **Set Required Environment Variables:**
