@@ -3,12 +3,19 @@ name: 'Review App Build & Deploy Pipeline'
 trigger: none
 pr: none
 
+
+parameters:
+  - name: PR_NUMBER
+    displayName: PR Number
+    type: string
+  - name: SHA
+    displayName: Commit SHA
+    type: string
+
 variables:
-  DOCKER_REGISTRY: 'ghcr.io/$(Build.Repository.Name)'
-  PR_NUMBER: $(PR_NUMBER)
-  SHA: $(SHA)
-  DB_IMAGE: 'ghcr.io/$(Build.Repository.Name)/pr-$(PR_NUMBER)-db:$(SHA)'
-  FRONTEND_IMAGE: 'ghcr.io/$(Build.Repository.Name)/pr-$(PR_NUMBER)-app:$(SHA)'
+  DOCKER_REGISTRY: 'ghcr.io/josielbruk'
+  DB_IMAGE: '$(DOCKER_REGISTRY)/pr-${{ parameters.PR_NUMBER }}-db:${{ parameters.SHA }}'
+  FRONTEND_IMAGE: '$(DOCKER_REGISTRY)/pr-${{ parameters.PR_NUMBER }}-app:${{ parameters.SHA }}'
   AZURE_CONTAINERAPPS_ENV: 'cae-review-apps-env'
   AZURE_RESOURCE_GROUP: 'rg-cae-review-apps'
   DB_NAME: 'reviewapp'
@@ -19,7 +26,6 @@ pool:
   vmImage: 'ubuntu-latest'
 
 stages:
-
 - stage: Deploy
   jobs:
   - job: DeployReviewApp
@@ -33,14 +39,14 @@ stages:
         scriptLocation: 'inlineScript'
         inlineScript: |
           az containerapp create \
-            --name frontend-pr-$(PR_NUMBER) \
+            --name frontend-pr-${{ parameters.PR_NUMBER }} \
             --resource-group $(AZURE_RESOURCE_GROUP) \
             --environment $(AZURE_CONTAINERAPPS_ENV) \
             --image $(FRONTEND_IMAGE) \
-            --env-vars DB_HOST=db-pr-$(PR_NUMBER) DB_PORT=5432 DB_NAME=$(DB_NAME) DB_USER=$(DB_USER) DB_PASSWORD=$(DB_PASSWORD)
+            --env-vars DB_HOST=db-pr-${{ parameters.PR_NUMBER }} DB_PORT=5432 DB_NAME=$(DB_NAME) DB_USER=$(DB_USER) DB_PASSWORD=$(DB_PASSWORD)
 
           az containerapp create \
-            --name db-pr-$(PR_NUMBER) \
+            --name db-pr-${{ parameters.PR_NUMBER }} \
             --resource-group $(AZURE_RESOURCE_GROUP) \
             --environment $(AZURE_CONTAINERAPPS_ENV) \
             --image $(DB_IMAGE) \
@@ -59,5 +65,5 @@ stages:
         scriptType: 'bash'
         scriptLocation: 'inlineScript'
         inlineScript: |
-          az containerapp delete --name frontend-pr-$(PR_NUMBER) --resource-group $(AZURE_RESOURCE_GROUP) --yes
-          az containerapp delete --name db-pr-$(PR_NUMBER) --resource-group $(AZURE_RESOURCE_GROUP) --yes
+          az containerapp delete --name frontend-pr-${{parameters.PR_NUMBER }} --resource-group $(AZURE_RESOURCE_GROUP) --yes
+          az containerapp delete --name db-pr-${{parameters.PR_NUMBER }} --resource-group $(AZURE_RESOURCE_GROUP) --yes

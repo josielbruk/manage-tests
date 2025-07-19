@@ -12,10 +12,10 @@ pr: none
 
 parameters:
   - name: PR_NUMBER
+    displayName: PR Number
     type: string
   - name: SHA
-    type: string
-  - name: DOCKER_TAG
+    displayName: Commit SHA
     type: string
 
 pool:
@@ -25,5 +25,5 @@ steps:
 - script: |
     echo "PR Number: ${{ parameters.PR_NUMBER }}"
     echo "SHA: ${{ parameters.SHA }}"
-    echo "Docker Image Tag: ${{ parameters.DOCKER_TAG }}"
+    echo "Docker Image Tag: PR-${{ parameters.PR_NUMBER }}-${{ parameters.SHA }}"
   displayName: 'Print PR info and Docker tag'
