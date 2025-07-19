@@ -30,12 +30,7 @@ pool:
 
 stages:
 - stage: Deploy
-  condition: or(
-    eq('${{ parameters.ACTION }}', 'opened'),
-    eq('${{ parameters.ACTION }}', 'synchronize'),
-    eq('${{ parameters.ACTION }}', 'reopened'),
-    eq('${{ parameters.ACTION }}', 'modified')
-  )
+  condition: or(eq('${{ parameters.ACTION }}', 'opened'), eq('${{ parameters.ACTION }}', 'synchronize'), eq('${{ parameters.ACTION }}', 'reopened'), eq('${{ parameters.ACTION }}', 'modified'))
   jobs:
   - job: DeployReviewApp
     steps:
