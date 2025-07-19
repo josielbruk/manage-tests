@@ -25,5 +25,5 @@ steps:
 - script: |
     echo "PR Number: ${{ parameters.PR_NUMBER }}"
     echo "SHA: ${{ parameters.SHA }}"
-    echo "Docker Image Tag: "PR-${{ parameters.PR_NUMBER }}-${{ parameters.SHA }}"
+    echo "Docker Image Tag: PR-${{ parameters.PR_NUMBER }}-${{ parameters.SHA }}"
   displayName: 'Print PR info and Docker tag'
