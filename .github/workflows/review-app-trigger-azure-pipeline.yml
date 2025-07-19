@@ -1,4 +1,3 @@
-
 name: Trigger Azure Pipeline for PR
 on:
   workflow_call:
@@ -14,16 +13,33 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Get PR number and SHA
+      - name: Get PR number, SHA, and ACTION
         id: pr_info
         run: |
           echo "PR_NUMBER=${{ github.event.pull_request.number }}" >> $GITHUB_ENV
           echo "SHA=${{ github.sha }}" >> $GITHUB_ENV
           echo "DOCKER_TAG=PR-${{ github.event.pull_request.number }}-${{ github.sha }}" >> $GITHUB_ENV
-      - name: Output PR number and Docker tag
+          # Set ACTION based on event type
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            case "${{ github.event.action }}" in
+              opened|synchronize|reopened|modified)
+                echo "ACTION=${{ github.event.action }}" >> $GITHUB_ENV
+                ;;
+              closed)
+                if [[ "${{ github.event.pull_request.merged }}" == "true" ]]; then
+                  echo "ACTION=closed" >> $GITHUB_ENV
+                fi
+                ;;
+              *)
+                echo "ACTION=${{ github.event.action }}" >> $GITHUB_ENV
+                ;;
+            esac
+          fi
+      - name: Output PR number, Docker tag, and ACTION
         run: |
           echo "PR Number: $PR_NUMBER"
           echo "Docker Image Tag: $DOCKER_TAG"
+          echo "Action: $ACTION"
       - name: Azure login
         uses: azure/login@v2
         with:
@@ -36,4 +52,4 @@ jobs:
           az pipelines run --organization ${{ vars.AZURE_DEVOPS_PROJECT_URL }} \
             --project manage-test \
             --name 'Review apps build deploy' \
-            --parameters PR_NUMBER=${{ env.PR_NUMBER }} SHA=${{ env.SHA }}
+            --parameters PR_NUMBER=${{ env.PR_NUMBER }} SHA=${{ env.SHA }} ACTION=${{ env.ACTION }}

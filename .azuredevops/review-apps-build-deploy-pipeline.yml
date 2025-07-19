@@ -11,6 +11,9 @@ parameters:
   - name: SHA
     displayName: Commit SHA
     type: string
+  - name: ACTION
+    displayName: PR Action
+    type: string
 
 variables:
   DOCKER_REGISTRY: 'ghcr.io/josielbruk'
@@ -27,6 +30,12 @@ pool:
 
 stages:
 - stage: Deploy
+  condition: or(
+    eq('${{ parameters.ACTION }}', 'opened'),
+    eq('${{ parameters.ACTION }}', 'synchronize'),
+    eq('${{ parameters.ACTION }}', 'reopened'),
+    eq('${{ parameters.ACTION }}', 'modified')
+  )
   jobs:
   - job: DeployReviewApp
     steps:
@@ -53,7 +62,7 @@ stages:
             --env-vars POSTGRES_DB=$(DB_NAME) POSTGRES_USER=$(DB_USER) POSTGRES_PASSWORD=$(DB_PASSWORD)
 
 - stage: Cleanup
-  condition: or(eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.Reason'], 'PullRequestMerged'))
+  condition: eq('${{ parameters.ACTION }}', 'closed')
   jobs:
   - job: CleanupReviewApp
     steps:
