@@ -67,4 +67,4 @@ jobs:
           subject-name: ${{ env.REGISTRY }}/${{ env.DB_IMAGE_NAME }}
           subject-digest: ${{ steps.push_db.outputs.digest }}
           push-to-registry: true
-*** DELETE FILE ***
+
