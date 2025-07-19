@@ -12,10 +12,13 @@ pr: none
 
 parameters:
   - name: PR_NUMBER
+    displayName: PR Number
     type: string
   - name: SHA
+    displayName: Commit SHA
     type: string
   - name: DOCKER_TAG
+    displayName: DOCKER TAG
     type: string
 
 pool:
