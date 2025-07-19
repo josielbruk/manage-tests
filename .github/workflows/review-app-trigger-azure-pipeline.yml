@@ -22,7 +22,7 @@ jobs:
         with:
           azure-devops-project-url: ${{ secrets.AZURE_DEVOPS_PROJECT_URL }}
           azure-pipeline-name: 'Review App Trigger Pipeline'
-          azure-devops-token: ${{ secrets.AZURE_DEVOPS_TOKEN }}
+          oidc: true
           variables: |
             PR_NUMBER=${{ env.PR_NUMBER }}
             SHA=${{ env.SHA }}
