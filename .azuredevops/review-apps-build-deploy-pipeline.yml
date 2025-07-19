@@ -19,27 +19,6 @@ pool:
   vmImage: 'ubuntu-latest'
 
 stages:
-- stage: Build
-  jobs:
-  - job: BuildImages
-    steps:
-    - checkout: self
-
-    - task: DockerInstaller@0
-      inputs:
-        dockerVersion: 'latest'
-
-    - script: |
-        docker build -t $(DB_IMAGE) apps/database
-        docker build -t $(FRONTEND_IMAGE) apps/frontend
-
-    - script: |
-        echo $(GITHUB_TOKEN) | docker login ghcr.io -u $(GITHUB_USER) --password-stdin
-        docker push $(DB_IMAGE)
-        docker push $(FRONTEND_IMAGE)
-      env:
-        GITHUB_TOKEN: $(GITHUB_TOKEN)
-        GITHUB_USER: $(GITHUB_USER)
 
 - stage: Deploy
   jobs:
