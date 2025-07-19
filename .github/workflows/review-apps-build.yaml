@@ -71,13 +71,6 @@ jobs:
           subject-name: ${{ env.REGISTRY }}/${{ env.DB_IMAGE_NAME }}
           subject-digest: ${{ steps.push_db.outputs.digest }}
           push-to-registry: true
-name: 'Review App Build & Publish'
-#
-# This workflow builds and publishes Docker images for ephemeral Review Apps
-# triggered by Pull Requests. Images are tagged per PR and used for temporary
-# environments for feature review and testing.
-on:
-  pull_request:
     types: [opened, synchronize]
 
 jobs:
