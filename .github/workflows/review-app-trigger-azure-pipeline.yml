@@ -3,6 +3,9 @@ name: Trigger Azure Pipeline for PR
 on:
   workflow_call:
 
+permissions:
+  id-token: write
+  contents: read
 jobs:
   trigger-azure-pipeline:
     name: Deploy Review App
@@ -22,7 +25,7 @@ jobs:
         run: |
           echo "PR Number: $PR_NUMBER"
           echo "Docker Image Tag: $DOCKER_TAG"
-      - name: Azure Login
+      - name: Azure login
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
