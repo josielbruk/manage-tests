@@ -1,0 +1,29 @@
+name: Trigger Azure Pipeline for PR
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  trigger-azure-pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get PR number and SHA
+        id: pr_info
+        run: |
+          echo "PR_NUMBER=${{ github.event.pull_request.number }}" >> $GITHUB_ENV
+          echo "SHA=${{ github.sha }}" >> $GITHUB_ENV
+          echo "DOCKER_TAG=PR-${{ github.event.pull_request.number }}-${{ github.sha }}" >> $GITHUB_ENV
+      - name: Output PR number and Docker tag
+        run: |
+          echo "PR Number: $PR_NUMBER"
+          echo "Docker Image Tag: $DOCKER_TAG"
+      - name: Trigger Azure DevOps Pipeline
+        uses: Azure/pipelines@v1
+        with:
+          azure-devops-project-url: ${{ secrets.AZURE_DEVOPS_PROJECT_URL }}
+          azure-pipeline-name: 'pr-trigger-pipeline'
+          azure-devops-token: ${{ secrets.AZURE_DEVOPS_TOKEN }}
+          variables: |
+            PR_NUMBER=${{ env.PR_NUMBER }}
+            SHA=${{ env.SHA }}
+            DOCKER_TAG=${{ env.DOCKER_TAG }}

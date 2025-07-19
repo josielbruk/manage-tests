@@ -1,0 +1,14 @@
+sequenceDiagram
+  participant Dev as Developer
+  participant GH as GitHub Actions (CI)
+  participant ADO as Azure DevOps (CD)
+  participant Azure as Azure Container Apps
+  participant DB as Ephemeral PostgreSQL
+
+  Dev->>GH: Push PR / comment
+  GH->>GH: Build & attest image
+  GH->>ADO: Trigger pipeline (OIDC federation)
+  ADO->>Azure: Deploy App + PostgreSQL container app
+  Azure->>Dev: PR Comment with URL
+  Dev->>App: Preview and test
+  GH->>Azure: Trigger cleanup on PR close or 8h idle
