@@ -5,10 +5,10 @@ pr: none
 
 variables:
   DOCKER_REGISTRY: 'ghcr.io/$(Build.Repository.Name)'
-  PR_NUMBER: $(System.PullRequest.PullRequestId)
-  SHA: $(Build.SourceVersion)
-  DB_IMAGE: 'ghcr.io/$(Build.Repository.Name)/pr-$(System.PullRequest.PullRequestId)-db:$(Build.SourceVersion)'
-  FRONTEND_IMAGE: 'ghcr.io/$(Build.Repository.Name)/pr-$(System.PullRequest.PullRequestId)-app:$(Build.SourceVersion)'
+  PR_NUMBER: $(PR_NUMBER)
+  SHA: $(SHA)
+  DB_IMAGE: 'ghcr.io/$(Build.Repository.Name)/pr-$(PR_NUMBER)-db:$(SHA)'
+  FRONTEND_IMAGE: 'ghcr.io/$(Build.Repository.Name)/pr-$(PR_NUMBER)-app:$(SHA)'
   AZURE_CONTAINERAPPS_ENV: 'cae-review-apps-env'
   AZURE_RESOURCE_GROUP: 'rg-cae-review-apps'
   DB_NAME: 'reviewapp'
