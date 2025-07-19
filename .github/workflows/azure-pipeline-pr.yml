@@ -21,7 +21,7 @@ jobs:
         uses: Azure/pipelines@v1
         with:
           azure-devops-project-url: ${{ secrets.AZURE_DEVOPS_PROJECT_URL }}
-          azure-pipeline-name: 'pr-trigger-pipeline'
+          azure-pipeline-name: 'Review App Trigger Pipeline'
           azure-devops-token: ${{ secrets.AZURE_DEVOPS_TOKEN }}
           variables: |
             PR_NUMBER=${{ env.PR_NUMBER }}
