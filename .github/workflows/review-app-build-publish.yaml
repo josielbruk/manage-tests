@@ -54,15 +54,6 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.DB_IMAGE_NAME }}:${{ github.sha }}
             ${{ env.REGISTRY }}/${{ env.DB_IMAGE_NAME }}:pr-${{ env.PR_NUMBER }}
 
-      - name: 'Output image tags'
-        run: |
-          echo "Frontend image:"
-          echo "  ${{ env.REGISTRY }}/${{ env.APP_IMAGE_NAME }}:${{ github.sha }}"
-          echo "  ${{ env.REGISTRY }}/${{ env.APP_IMAGE_NAME }}:pr-${{ env.PR_NUMBER }}"
-          echo "Database image:"
-          echo "  ${{ env.REGISTRY }}/${{ env.DB_IMAGE_NAME }}:${{ github.sha }}"
-          echo "  ${{ env.REGISTRY }}/${{ env.DB_IMAGE_NAME }}:pr-${{ env.PR_NUMBER }}"
-
   trigger-azure-pipeline:
     name: 'Trigger Azure Pipeline for PR'
     needs: build
