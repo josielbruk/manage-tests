@@ -14,7 +14,7 @@ env:
   ORG_NAME: ${{ github.repository_owner }}
   REGISTRY: ghcr.io/${{ github.repository_owner }}
   # Define image name using PR number from the event context
-  APP_IMAGE_NAME: pr-${{ github.event.pull_request.number }}-app
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   build_and_push:
@@ -41,8 +41,8 @@ jobs:
           context: apps/frontend
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ env.APP_IMAGE_NAME }}:${{ github.sha }}
-            ${{ env.REGISTRY }}/${{ env.APP_IMAGE_NAME }}:pr-${{ github.event.pull_request.number }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:pr-${{ github.event.pull_request.number }}-${{ github.sha }}
 
   trigger_azure_pipeline:
     name: 'Trigger Azure Deployment'
