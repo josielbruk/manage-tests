@@ -1,45 +1,56 @@
-name: Trigger Azure Pipeline for PR
+name: 'Review App Build & Deploy'
+
 on:
-  workflow_call:
+  pull_request:
+    types: [opened, synchronize, closed, reopened]
 
 permissions:
   id-token: write
   contents: read
+  packages: write
+  attestations: write
+
+env:
+  ORG_NAME: ${{ github.repository_owner }}
+  REGISTRY: ghcr.io/${{ github.repository_owner }}
+  # Define image name using PR number from the event context
+  APP_IMAGE_NAME: pr-${{ github.event.pull_request.number }}-app
+
 jobs:
-  trigger-azure-pipeline:
-    name: Deploy Review App
+  build_and_push:
+    name: 'Build & Push Container Image'
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # Only run this job if the PR was not closed
+    if: github.event.action != 'closed'
+
     steps:
-      - name: Checkout code
+      - name: 'Checkout repository'
         uses: actions/checkout@v4
 
-      - name: Get PR number, SHA, and ACTION
-        id: pr_info
-        run: |
-          echo "PR_NUMBER=${{ github.event.pull_request.number }}" >> $GITHUB_ENV
-          echo "SHA=${{ github.sha }}" >> $GITHUB_ENV
-          echo "DOCKER_TAG=PR-${{ github.event.pull_request.number }}-${{ github.sha }}" >> $GITHUB_ENV
-          # Set ACTION based on event type
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            case "${{ github.event.action }}" in
-              opened|synchronize|reopened|modified)
-                echo "ACTION=${{ github.event.action }}" >> $GITHUB_ENV
-                ;;
-              closed)
-                if [[ "${{ github.event.pull_request.merged }}" == "true" ]]; then
-                  echo "ACTION=closed" >> $GITHUB_ENV
-                fi
-                ;;
-              *)
-                echo "ACTION=${{ github.event.action }}" >> $GITHUB_ENV
-                ;;
-            esac
-          fi
-      - name: Output PR number, Docker tag, and ACTION
-        run: |
-          echo "PR Number: $PR_NUMBER"
-          echo "Docker Image Tag: $DOCKER_TAG"
-          echo "Action: $ACTION"
+      - name: 'Log in to GitHub Container Registry (GHCR)'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 'Build and push application image'
+        uses: docker/build-push-action@v5
+        with:
+          context: apps/frontend
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.APP_IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.APP_IMAGE_NAME }}:pr-${{ github.event.pull_request.number }}
+
+  trigger_azure_pipeline:
+    name: 'Trigger Azure Deployment'
+    # This job depends on the build finishing successfully
+    needs: build_and_push
+    runs-on: ubuntu-latest
+
+    steps:
       - name: Azure login
         uses: azure/login@v2
         with:
@@ -47,9 +58,69 @@ jobs:
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Trigger Azure DevOps Pipeline via Azure CLI
+      - name: Trigger Azure DevOps Pipeline
+        # Directly use the event context. No need for a complex script.
         run: |
-          az pipelines run --organization ${{ vars.AZURE_DEVOPS_PROJECT_URL }} \
-            --project manage-test \
-            --name 'Review Apps Environment' \
-            --parameters PR_NUMBER=${{ env.PR_NUMBER }} SHA=${{ env.SHA }} ACTION=${{ env.ACTION }}
+          az pipelines run --organization "${{ vars.AZURE_DEVOPS_PROJECT_URL }}" \
+            --project "manage-test" \
+            --name "Review Apps Environment" \
+            --parameters PR_NUMBER="${{ github.event.pull_request.number }}" \
+                         SHA="${{ github.sha }}" \
+                         ACTION="${{ github.event.action }}"
+
+
+# name: Trigger Azure Pipeline for PR
+# on:
+#   workflow_call:
+
+# permissions:
+#   id-token: write
+#   contents: read
+# jobs:
+#   trigger-azure-pipeline:
+#     name: Deploy Review App
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
+
+#       - name: Get PR number, SHA, and ACTION
+#         id: pr_info
+#         run: |
+#           echo "PR_NUMBER=${{ github.event.pull_request.number }}" >> $GITHUB_ENV
+#           echo "SHA=${{ github.sha }}" >> $GITHUB_ENV
+#           echo "DOCKER_TAG=PR-${{ github.event.pull_request.number }}-${{ github.sha }}" >> $GITHUB_ENV
+#           # Set ACTION based on event type
+#           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+#             case "${{ github.event.action }}" in
+#               opened|synchronize|reopened|modified)
+#                 echo "ACTION=${{ github.event.action }}" >> $GITHUB_ENV
+#                 ;;
+#               closed)
+#                 if [[ "${{ github.event.pull_request.merged }}" == "true" ]]; then
+#                   echo "ACTION=closed" >> $GITHUB_ENV
+#                 fi
+#                 ;;
+#               *)
+#                 echo "ACTION=${{ github.event.action }}" >> $GITHUB_ENV
+#                 ;;
+#             esac
+#           fi
+#       - name: Output PR number, Docker tag, and ACTION
+#         run: |
+#           echo "PR Number: $PR_NUMBER"
+#           echo "Docker Image Tag: $DOCKER_TAG"
+#           echo "Action: $ACTION"
+#       - name: Azure login
+#         uses: azure/login@v2
+#         with:
+#           client-id: ${{ vars.AZURE_CLIENT_ID }}
+#           tenant-id: ${{ vars.AZURE_TENANT_ID }}
+#           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+#       - name: Trigger Azure DevOps Pipeline via Azure CLI
+#         run: |
+#           az pipelines run --organization ${{ vars.AZURE_DEVOPS_PROJECT_URL }} \
+#             --project manage-test \
+#             --name 'Review Apps Environment' \
+#             --parameters PR_NUMBER=${{ env.PR_NUMBER }} SHA=${{ env.SHA }} ACTION=${{ env.ACTION }}
