@@ -45,15 +45,6 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.APP_IMAGE_NAME }}:${{ github.sha }}
             ${{ env.REGISTRY }}/${{ env.APP_IMAGE_NAME }}:pr-${{ env.PR_NUMBER }}
 
-      - name: 'Build and push database image'
-        uses: docker/build-push-action@v5
-        with:
-          context: apps/database
-          push: true
-          tags: |
-            ${{ env.REGISTRY }}/${{ env.DB_IMAGE_NAME }}:${{ github.sha }}
-            ${{ env.REGISTRY }}/${{ env.DB_IMAGE_NAME }}:pr-${{ env.PR_NUMBER }}
-
   trigger-azure-pipeline:
     name: 'Trigger Azure Pipeline for PR'
     needs: build
