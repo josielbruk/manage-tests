@@ -50,18 +50,12 @@ stages:
             --image postgres:16-alpine \
             --min-replicas 1 \
             --max-replicas 5 \
-            --env-vars POSTGRES_DB=$(DB_NAME) POSTGRES_USER=$(DB_USER) POSTGRES_PASSWORD=$(DB_PASSWORD) \
+            --env-vars POSTGRES_DB=$(DB_NAME) POSTGRES_USER=$(DB_USER) POSTGRES_PASSWORD=$(DB_PASSWORD) CSRF_TRUSTED_ORIGINS='https://*.azurecontainerapps.io' \
+            --query properties.configuration.ingress.fqdn\
             --ingress internal \
             --target-port 5432 \
             --exposed-port 5432 \
             --transport 'tcp'
-
-          # # Retrieve the FQDN of the Postgres container app
-          # DB_FQDN=$(az containerapp show \
-          #   --name db-pr-${{ parameters.PR_NUMBER }} \
-          #   --resource-group $(AZURE_RESOURCE_GROUP) \
-          #   --query properties.configuration.ingress.fqdn -o tsv)
-          # DB_FQDN=${DB_FQDN//\"/}
 
           # Deploy the frontend container app with the correct DB_HOST
           az containerapp create \

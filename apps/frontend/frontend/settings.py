@@ -51,3 +51,6 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # Silence primary key warning by setting default auto field
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Allow CSRF-protected requests from Azure Container Apps review app URLs, configurable via environment variable
+CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", "https://*.azurecontainerapps.io").split(",")
