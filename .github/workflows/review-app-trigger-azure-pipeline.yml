@@ -47,7 +47,6 @@ jobs:
   trigger_azure_pipeline:
     name: 'Trigger Azure Deployment'
     # This job depends on the build finishing successfully
-    needs: build_and_push
     runs-on: ubuntu-latest
 
     steps:
