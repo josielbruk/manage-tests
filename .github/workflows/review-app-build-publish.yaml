@@ -1,60 +1,60 @@
-# name: 'Review App Build & Publish'
+name: 'Review App Build & Publish'
 
-# on:
-#   pull_request:
-#     types: [opened, synchronize, closed, reopened]
+on:
+  pull_request:
+    types: [opened, synchronize, closed, reopened]
 
-# permissions:
-#   id-token: write
-#   contents: read
-#   packages: write
-#   attestations: write
+permissions:
+  id-token: write
+  contents: read
+  packages: write
+  attestations: write
 
-# env:
-#   ORG_NAME: ${{ github.repository_owner }}
+env:
+  ORG_NAME: ${{ github.repository_owner }}
 
-# jobs:
-#   build:
-#     name: 'Build & Push Container Images'
-#     runs-on: ubuntu-latest
-#     timeout-minutes: 5
+jobs:
+  build:
+    name: 'Build & Push Container Images'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
 
-#     env:
-#       REGISTRY: ghcr.io/${{ github.repository_owner }}
-#       PR_NUMBER: ${{ github.event.pull_request.number }}
-#       APP_IMAGE_NAME: pr-${{ github.event.pull_request.number }}-app
-#       DB_IMAGE_NAME: pr-${{ github.event.pull_request.number }}-db
+    env:
+      REGISTRY: ghcr.io/${{ github.repository_owner }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      APP_IMAGE_NAME: pr-${{ github.event.pull_request.number }}-app
+      DB_IMAGE_NAME: pr-${{ github.event.pull_request.number }}-db
 
-#     steps:
-#       - name: 'Checkout repository'
-#         uses: actions/checkout@v4
+    steps:
+      - name: 'Checkout repository'
+        uses: actions/checkout@v4
 
-#       - name: 'Log in to GitHub Container Registry (GHCR)'
-#         uses: docker/login-action@v3
-#         with:
-#           registry: ghcr.io
-#           username: ${{ github.actor }}
-#           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: 'Log in to GitHub Container Registry (GHCR)'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-#       - name: 'Build and push frontend image'
-#         uses: docker/build-push-action@v5
-#         with:
-#           context: apps/frontend
-#           push: true
-#           tags: |
-#             ${{ env.REGISTRY }}/${{ env.APP_IMAGE_NAME }}:${{ github.sha }}
-#             ${{ env.REGISTRY }}/${{ env.APP_IMAGE_NAME }}:pr-${{ env.PR_NUMBER }}
+      - name: 'Build and push frontend image'
+        uses: docker/build-push-action@v5
+        with:
+          context: apps/frontend
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.APP_IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.APP_IMAGE_NAME }}:pr-${{ env.PR_NUMBER }}
 
-#       - name: 'Build and push database image'
-#         uses: docker/build-push-action@v5
-#         with:
-#           context: apps/database
-#           push: true
-#           tags: |
-#             ${{ env.REGISTRY }}/${{ env.DB_IMAGE_NAME }}:${{ github.sha }}
-#             ${{ env.REGISTRY }}/${{ env.DB_IMAGE_NAME }}:pr-${{ env.PR_NUMBER }}
+      - name: 'Build and push database image'
+        uses: docker/build-push-action@v5
+        with:
+          context: apps/database
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.DB_IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.DB_IMAGE_NAME }}:pr-${{ env.PR_NUMBER }}
 
-#   trigger-azure-pipeline:
-#     name: 'Trigger Azure Pipeline for PR'
-#     needs: build
-#     uses: ./.github/workflows/review-app-trigger-azure-pipeline.yml
+  trigger-azure-pipeline:
+    name: 'Trigger Azure Pipeline for PR'
+    needs: build
+    uses: ./.github/workflows/review-app-trigger-azure-pipeline.yml
