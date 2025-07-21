@@ -42,20 +42,31 @@ stages:
         scriptType: 'bash'
         scriptLocation: 'inlineScript'
         inlineScript: |
+          # Deploy the Postgres container app first
+          az containerapp create \
+            --name db-pr-${{ parameters.PR_NUMBER }} \
+            --resource-group $(AZURE_RESOURCE_GROUP) \
+            --environment $(AZURE_CONTAINERAPPS_ENV) \
+            --query properties.configuration.ingress.fqdn \
+            --image postgres:16-alpine \
+            --ingress external
+            --target-port 80
+            --env-vars POSTGRES_DB=$(DB_NAME) POSTGRES_USER=$(DB_USER) POSTGRES_PASSWORD=$(DB_PASSWORD)
+
+          # Retrieve the FQDN of the Postgres container app
+          DB_FQDN=$(az containerapp show \
+            --name db-pr-${{ parameters.PR_NUMBER }} \
+            --resource-group $(AZURE_RESOURCE_GROUP) \
+            --query properties.configuration.ingress.fqdn)
+
+          # Deploy the frontend container app with the correct DB_HOST
           az containerapp create \
             --name frontend-pr-${{ parameters.PR_NUMBER }} \
             --resource-group $(AZURE_RESOURCE_GROUP) \
             --environment $(AZURE_CONTAINERAPPS_ENV) \
             --image $(FRONTEND_IMAGE) \
-            --env-vars DB_HOST=db-pr-${{ parameters.PR_NUMBER }} DB_PORT=5432 DB_NAME=$(DB_NAME) DB_USER=$(DB_USER) DB_PASSWORD=$(DB_PASSWORD)
+            --env-vars DB_HOST=$DB_FQDN DB_PORT=5432 DB_NAME=$(DB_NAME) DB_USER=$(DB_USER) DB_PASSWORD=$(DB_PASSWORD)
             --query properties.configuration.ingress.fqdn
-
-          az containerapp create \
-            --name db-pr-${{ parameters.PR_NUMBER }} \
-            --resource-group $(AZURE_RESOURCE_GROUP) \
-            --environment $(AZURE_CONTAINERAPPS_ENV) \
-            --image $(DB_IMAGE) \
-            --env-vars POSTGRES_DB=$(DB_NAME) POSTGRES_USER=$(DB_USER) POSTGRES_PASSWORD=$(DB_PASSWORD)
 
 - stage: Cleanup
   condition: eq('${{ parameters.ACTION }}', 'closed')
