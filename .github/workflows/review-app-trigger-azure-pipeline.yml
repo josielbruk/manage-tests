@@ -46,7 +46,6 @@ jobs:
 
   trigger_azure_pipeline:
     name: 'Trigger Azure Deployment'
-    # This job depends on the build finishing successfully
     runs-on: ubuntu-latest
 
     steps:
@@ -66,60 +65,3 @@ jobs:
             --parameters PR_NUMBER="${{ github.event.pull_request.number }}" \
                          SHA="${{ github.sha }}" \
                          ACTION="${{ github.event.action }}"
-
-
-# name: Trigger Azure Pipeline for PR
-# on:
-#   workflow_call:
-
-# permissions:
-#   id-token: write
-#   contents: read
-# jobs:
-#   trigger-azure-pipeline:
-#     name: Deploy Review App
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Checkout code
-#         uses: actions/checkout@v4
-
-#       - name: Get PR number, SHA, and ACTION
-#         id: pr_info
-#         run: |
-#           echo "PR_NUMBER=${{ github.event.pull_request.number }}" >> $GITHUB_ENV
-#           echo "SHA=${{ github.sha }}" >> $GITHUB_ENV
-#           echo "DOCKER_TAG=PR-${{ github.event.pull_request.number }}-${{ github.sha }}" >> $GITHUB_ENV
-#           # Set ACTION based on event type
-#           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-#             case "${{ github.event.action }}" in
-#               opened|synchronize|reopened|modified)
-#                 echo "ACTION=${{ github.event.action }}" >> $GITHUB_ENV
-#                 ;;
-#               closed)
-#                 if [[ "${{ github.event.pull_request.merged }}" == "true" ]]; then
-#                   echo "ACTION=closed" >> $GITHUB_ENV
-#                 fi
-#                 ;;
-#               *)
-#                 echo "ACTION=${{ github.event.action }}" >> $GITHUB_ENV
-#                 ;;
-#             esac
-#           fi
-#       - name: Output PR number, Docker tag, and ACTION
-#         run: |
-#           echo "PR Number: $PR_NUMBER"
-#           echo "Docker Image Tag: $DOCKER_TAG"
-#           echo "Action: $ACTION"
-#       - name: Azure login
-#         uses: azure/login@v2
-#         with:
-#           client-id: ${{ vars.AZURE_CLIENT_ID }}
-#           tenant-id: ${{ vars.AZURE_TENANT_ID }}
-#           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
-
-#       - name: Trigger Azure DevOps Pipeline via Azure CLI
-#         run: |
-#           az pipelines run --organization ${{ vars.AZURE_DEVOPS_PROJECT_URL }} \
-#             --project manage-test \
-#             --name 'Review Apps Environment' \
-#             --parameters PR_NUMBER=${{ env.PR_NUMBER }} SHA=${{ env.SHA }} ACTION=${{ env.ACTION }}
