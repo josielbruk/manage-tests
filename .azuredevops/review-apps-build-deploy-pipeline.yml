@@ -48,6 +48,8 @@ stages:
             --resource-group $(AZURE_RESOURCE_GROUP) \
             --environment $(AZURE_CONTAINERAPPS_ENV) \
             --image postgres:16-alpine \
+            --min-replicas 1 \
+            --max-replicas 5 \
             --env-vars POSTGRES_DB=$(DB_NAME) POSTGRES_USER=$(DB_USER) POSTGRES_PASSWORD=$(DB_PASSWORD) \
             --ingress internal \
             --target-port 5432
