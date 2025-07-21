@@ -69,7 +69,7 @@ stages:
             --environment $(AZURE_CONTAINERAPPS_ENV) \
             --image $(FRONTEND_IMAGE) \
             --ingress external \
-            --target-port 443 \
+            --target-port 8000 \
             --env-vars DB_HOST=db-pr-${{ parameters.PR_NUMBER }} DB_PORT=5432 DB_NAME=$(DB_NAME) DB_USER=$(DB_USER) DB_PASSWORD=$(DB_PASSWORD) \
             --query properties.configuration.ingress.fqdn
 
