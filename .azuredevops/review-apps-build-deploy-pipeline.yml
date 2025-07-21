@@ -55,12 +55,12 @@ stages:
             --target-port 5432 \
             --transport 'tcp'
 
-          # Retrieve the FQDN of the Postgres container app
-          DB_FQDN=$(az containerapp show \
-            --name db-pr-${{ parameters.PR_NUMBER }} \
-            --resource-group $(AZURE_RESOURCE_GROUP) \
-            --query properties.configuration.ingress.fqdn -o tsv)
-          DB_FQDN=${DB_FQDN//\"/}
+          # # Retrieve the FQDN of the Postgres container app
+          # DB_FQDN=$(az containerapp show \
+          #   --name db-pr-${{ parameters.PR_NUMBER }} \
+          #   --resource-group $(AZURE_RESOURCE_GROUP) \
+          #   --query properties.configuration.ingress.fqdn -o tsv)
+          # DB_FQDN=${DB_FQDN//\"/}
 
           # Deploy the frontend container app with the correct DB_HOST
           az containerapp create \
