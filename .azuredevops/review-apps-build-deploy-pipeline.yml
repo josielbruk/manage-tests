@@ -1,4 +1,4 @@
-name: 'Review App Build & Deploy Pipeline'
+name: 'Review Apps Environment'
 
 trigger: none
 pr: none
@@ -48,6 +48,7 @@ stages:
             --environment $(AZURE_CONTAINERAPPS_ENV) \
             --image $(FRONTEND_IMAGE) \
             --env-vars DB_HOST=db-pr-${{ parameters.PR_NUMBER }} DB_PORT=5432 DB_NAME=$(DB_NAME) DB_USER=$(DB_USER) DB_PASSWORD=$(DB_PASSWORD)
+            --query properties.configuration.ingress.fqdn
 
           az containerapp create \
             --name db-pr-${{ parameters.PR_NUMBER }} \
