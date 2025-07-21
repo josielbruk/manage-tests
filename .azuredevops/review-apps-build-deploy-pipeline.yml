@@ -52,14 +52,16 @@ stages:
             --max-replicas 5 \
             --env-vars POSTGRES_DB=$(DB_NAME) POSTGRES_USER=$(DB_USER) POSTGRES_PASSWORD=$(DB_PASSWORD) \
             --ingress internal \
-            --target-port 5432
+            --target-port 5432 \
+            --exposed-ports 5432 \
+            --transport 'tcp'
 
-          # Retrieve the FQDN of the Postgres container app
-          DB_FQDN=$(az containerapp show \
-            --name db-pr-${{ parameters.PR_NUMBER }} \
-            --resource-group $(AZURE_RESOURCE_GROUP) \
-            --query properties.configuration.ingress.fqdn -o tsv)
-          DB_FQDN=${DB_FQDN//\"/}
+          # # Retrieve the FQDN of the Postgres container app
+          # DB_FQDN=$(az containerapp show \
+          #   --name db-pr-${{ parameters.PR_NUMBER }} \
+          #   --resource-group $(AZURE_RESOURCE_GROUP) \
+          #   --query properties.configuration.ingress.fqdn -o tsv)
+          # DB_FQDN=${DB_FQDN//\"/}
 
           # Deploy the frontend container app with the correct DB_HOST
           az containerapp create \
@@ -68,8 +70,8 @@ stages:
             --environment $(AZURE_CONTAINERAPPS_ENV) \
             --image $(FRONTEND_IMAGE) \
             --ingress external \
-            --target-port 80 \
-            --env-vars DB_HOST=$DB_FQDN DB_PORT=5432 DB_NAME=$(DB_NAME) DB_USER=$(DB_USER) DB_PASSWORD=$(DB_PASSWORD) \
+            --target-port 8000 \
+            --env-vars DB_HOST=db-pr-${{ parameters.PR_NUMBER }} DB_PORT=5432 DB_NAME=$(DB_NAME) DB_USER=$(DB_USER) DB_PASSWORD=$(DB_PASSWORD) \
             --query properties.configuration.ingress.fqdn
 
 - stage: Cleanup
