@@ -49,6 +49,8 @@ stages:
             --environment $(AZURE_CONTAINERAPPS_ENV) \
             --query properties.configuration.ingress.fqdn \
             --image postgres:16-alpine \
+            --ingress external
+            --target-port 80
             --env-vars POSTGRES_DB=$(DB_NAME) POSTGRES_USER=$(DB_USER) POSTGRES_PASSWORD=$(DB_PASSWORD)
 
           # Retrieve the FQDN of the Postgres container app
