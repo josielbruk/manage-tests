@@ -47,6 +47,8 @@ jobs:
   trigger_azure_pipeline:
     name: 'Trigger Azure Deployment'
     runs-on: ubuntu-latest
+    needs: build_and_push
+    if: always()
 
     steps:
       - name: Azure login
