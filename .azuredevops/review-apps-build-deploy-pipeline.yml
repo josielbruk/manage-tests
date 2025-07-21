@@ -47,6 +47,7 @@ stages:
             --name db-pr-${{ parameters.PR_NUMBER }} \
             --resource-group $(AZURE_RESOURCE_GROUP) \
             --environment $(AZURE_CONTAINERAPPS_ENV) \
+            --query properties.configuration.ingress.fqdn \
             --image postgres:16-alpine \
             --env-vars POSTGRES_DB=$(DB_NAME) POSTGRES_USER=$(DB_USER) POSTGRES_PASSWORD=$(DB_PASSWORD)
 
@@ -54,7 +55,7 @@ stages:
           DB_FQDN=$(az containerapp show \
             --name db-pr-${{ parameters.PR_NUMBER }} \
             --resource-group $(AZURE_RESOURCE_GROUP) \
-            --query properties.configuration.ingress.fqdn -o tsv)
+            --query properties.configuration.ingress.fqdn)
 
           # Deploy the frontend container app with the correct DB_HOST
           az containerapp create \
