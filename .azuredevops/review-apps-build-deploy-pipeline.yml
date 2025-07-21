@@ -41,6 +41,7 @@ stages:
         azureSubscription: 'az-ado-sc'
         scriptType: 'bash'
         scriptLocation: 'inlineScript'
+        name: Deploy Review App
         inlineScript: |
           # Deploy the Postgres container app first
           az containerapp create \
@@ -80,6 +81,7 @@ stages:
         azureSubscription: 'az-ado-sc'
         scriptType: 'bash'
         scriptLocation: 'inlineScript'
+        name: Cleanup Review App
         inlineScript: |
           az containerapp delete --name frontend-pr-${{parameters.PR_NUMBER }} --resource-group $(AZURE_RESOURCE_GROUP) --yes
           az containerapp delete --name db-pr-${{parameters.PR_NUMBER }} --resource-group $(AZURE_RESOURCE_GROUP) --yes
