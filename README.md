@@ -61,6 +61,9 @@ This project uses GitHub Actions and Azure DevOps to build, push, and attest Doc
      - `DB_IMAGE_NAME`: e.g., `pr-<number>-db`
      - `DB_NAME`, `DB_USER`, `DB_PASSWORD` (for database container)
      - `AZURE_RESOURCE_GROUP`, `AZURE_CONTAINERAPPS_ENV` (for deployment)
+     - `DB_HOST`:
+       - For local development, this defaults to `db` (Docker Compose service name).
+       - For cloud deployments (Azure Container Apps), set this to the FQDN of the Postgres container app (e.g., `db-pr-15.internal.salmonsmoke-730a9f0b.uksouth.azurecontainerapps.io`).
 5. **Open a Pull Request:**
    - The workflow will build and push Docker images named and tagged for the PR:
      - Frontend: `pr-<number>-app:<sha>`
@@ -80,7 +83,9 @@ This project uses GitHub Actions and Azure DevOps to build, push, and attest Doc
   cp frontend/.env.frontend.template frontend/.env.frontend
   docker-compose up --build
 
-  # Note: The frontend Dockerfile now automatically runs makemigrations for the contacts app before applying migrations and starting the server. This ensures your database schema is always up to date for local development.
+  # Note:
+  # - The frontend Dockerfile now automatically runs makemigrations for the contacts app before applying migrations and starting the server.
+  # - The Dockerfile uses the DB_HOST environment variable (defaulting to 'db') for database connectivity and wait-for-it. This allows seamless local and cloud deployments—just set DB_HOST appropriately in each environment.
   ```
 
 ### Manual Deployment & Teardown
