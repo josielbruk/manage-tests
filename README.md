@@ -79,6 +79,8 @@ This project uses GitHub Actions and Azure DevOps to build, push, and attest Doc
   cp database/.env.db.template database/.env.db
   cp frontend/.env.frontend.template frontend/.env.frontend
   docker-compose up --build
+
+  # Note: The frontend Dockerfile now automatically runs makemigrations for the contacts app before applying migrations and starting the server. This ensures your database schema is always up to date for local development.
   ```
 
 ### Manual Deployment & Teardown
