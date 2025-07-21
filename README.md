@@ -86,6 +86,8 @@ This project uses GitHub Actions and Azure DevOps to build, push, and attest Doc
   # Note:
   # - The frontend Dockerfile now automatically runs makemigrations for the contacts app before applying migrations and starting the server.
   # - The Dockerfile uses the DB_HOST environment variable (defaulting to 'db') for database connectivity and wait-for-it. This allows seamless local and cloud deployments—just set DB_HOST appropriately in each environment.
+  # - The Django project now sets `DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'` in `settings.py` to silence warnings about auto-created primary keys. If you see a warning about `AutoField`, it is informational and does not affect functionality.
+  # - When running in Azure Container Apps, you do NOT need to specify a port in the browser URL (e.g., use `https://frontend-pr-<number>.<env>.<region>.azurecontainerapps.io` without `:8000`).
   ```
 
 ### Manual Deployment & Teardown
