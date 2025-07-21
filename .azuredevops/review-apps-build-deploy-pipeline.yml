@@ -50,7 +50,7 @@ stages:
             --image postgres:16-alpine \
             --min-replicas 1 \
             --max-replicas 5 \
-            --env-vars POSTGRES_DB=$(DB_NAME) POSTGRES_USER=$(DB_USER) POSTGRES_PASSWORD=$(DB_PASSWORD) CSRF_TRUSTED_ORIGINS='*.azurecontainerapps.io' \
+            --env-vars POSTGRES_DB=$(DB_NAME) POSTGRES_USER=$(DB_USER) POSTGRES_PASSWORD=$(DB_PASSWORD) CSRF_TRUSTED_ORIGINS='https://*.azurecontainerapps.io' \
             --query properties.configuration.ingress.fqdn\
             --ingress internal \
             --target-port 5432 \
