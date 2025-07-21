@@ -6,4 +6,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 ENV DJANGO_SETTINGS_MODULE=frontend.settings
 COPY wait-for-it.sh /wait-for-it.sh
 RUN chmod +x /wait-for-it.sh
-CMD ["sh", "-c", "/wait-for-it.sh db 5432 -- bash -c 'python manage.py makemigrations contacts; until python manage.py migrate; do sleep 2; done; python manage.py runserver 0.0.0.0:8000'"]
+CMD ["sh", "-c", "/wait-for-it.sh ${DB_HOST:-db} 5432 -- bash -c 'python manage.py makemigrations contacts; until python manage.py migrate; do sleep 2; done; python manage.py runserver 0.0.0.0:8000'"]
