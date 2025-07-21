@@ -35,6 +35,7 @@ This project uses GitHub Actions and Azure DevOps to build, push, and attest Doc
 - **review-apps-build-deploy-pipeline.yml**
   - Builds, pushes, deploys, and cleans up ephemeral Review App environments for feature branches and PRs.
   - Uses PR number and SHA for image tagging and environment management.
+  - Deploys the database (Postgres) container app first, retrieves its FQDN, and injects it as the `DB_HOST` environment variable for the frontend container app. This ensures the frontend can connect to the database in Azure Container Apps.
   - Purpose: Full build/deploy/cleanup pipeline for review apps.
 
 - **review-apps-trigger-pipeline.yaml**
@@ -64,7 +65,10 @@ This project uses GitHub Actions and Azure DevOps to build, push, and attest Doc
    - The workflow will build and push Docker images named and tagged for the PR:
      - Frontend: `pr-<number>-app:<sha>`
      - Database: `pr-<number>-db:<sha>`
-   - Azure DevOps pipeline will deploy containers for the PR environment using these images.
+   - Azure DevOps pipeline will:
+     - Deploy the database (Postgres) container app first.
+     - Retrieve the FQDN of the database container app.
+     - Deploy the frontend container app, passing the FQDN as `DB_HOST` so the frontend can connect to the database.
    - On PR close/merge, the environment is automatically cleaned up.
 
 ### Local Development
@@ -99,6 +103,7 @@ This project uses GitHub Actions and Azure DevOps to build, push, and attest Doc
 - Ensure your Azure DevOps service connection has permissions for Container Apps.
 - Update image names, registry, and resource group as needed for your organization.
 - The workflow and pipeline are designed for ephemeral environments per PR for safe feature testing and review.
+- In Azure Container Apps, containers do not get automatic DNS hostnames. The pipeline now retrieves the database container app's FQDN and injects it as `DB_HOST` for the frontend, ensuring reliable connectivity.
 
 ---
 
