@@ -53,6 +53,7 @@ stages:
             --env-vars POSTGRES_DB=$(DB_NAME) POSTGRES_USER=$(DB_USER) POSTGRES_PASSWORD=$(DB_PASSWORD) \
             --ingress internal \
             --target-port 5432 \
+            --exposed-ports 5432 \
             --transport 'tcp'
 
           # # Retrieve the FQDN of the Postgres container app
