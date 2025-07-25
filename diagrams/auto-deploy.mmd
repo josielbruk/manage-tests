@@ -1,14 +1,15 @@
+---
+config:
+  theme: redux-color
+  look: handDrawn
+---
 sequenceDiagram
-  participant Dev as Developer
-  participant GH as GitHub Actions (CI)
-  participant ADO as Azure DevOps (CD)
-  participant Azure as Azure Container Apps
-  participant DB as Ephemeral PostgreSQL
-
-  Dev->>GH: Push PR / comment
-  GH->>GH: Build & attest image
-  GH->>ADO: Trigger pipeline (OIDC federation)
-  ADO->>Azure: Deploy App + PostgreSQL container app
-  Azure->>Dev: PR Comment with URL
-  Dev->>App: Preview and test
-  GH->>Azure: Trigger cleanup on PR close or 8h idle
+    participant Dev as Developer
+    participant GHA as GitHub Actions <br/>(CI)
+    participant ADO as Azure DevOps <br/>(CD)
+    participant ACA as Azure Container Apps
+    Dev->>GHA: 1. Pushes commit to PR
+    GHA->>GHA: 2. Build & Push Image to GHCR
+    GHA->>ADO: 3. Trigger CD Pipeline
+    ADO->>ACA: 4. Deploy Multi-Container App<br/>(App + Postgres DB)
+    ACA-->>GHA: 5. (via ADO) Post URL back to PR Comment or Slack channel
